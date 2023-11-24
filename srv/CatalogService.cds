@@ -1,8 +1,11 @@
 using { ashish.db.master, ashish.db.transaction } from '../db/datamodel';
  
-service CatalogService @(path: 'CatalogService') {
+service CatalogService @(path: 'CatalogService', requires: 'authenticated-user') {
  
-    entity EmployeeSet as projection on master.employees;
+    entity EmployeeSet @(restrict: [
+                        { grant: ['READ'], to: 'Viewer', where: 'bankName = $user.BankName' },
+                        { grant: ['WRITE'], to: 'Admin' }
+                        ]) as projection on master.employees;
     entity BusinessPartnerSet as projection on master.businesspartner;
     entity ProductSet as projection on master.product;
     entity BPAddressSet as projection on master.address;
@@ -33,4 +36,6 @@ service CatalogService @(path: 'CatalogService') {
         function largestOrder() returns array of POs;
     };
     entity PurchaseOrderItemSet as projection on transaction.poitems;
+ 
 }
+ 
